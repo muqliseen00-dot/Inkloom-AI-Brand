@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: inkloom
+    description: Inkloom brand governance operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,201 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /inkloom/dashboard:
+    get:
+      operationId: getInkloomDashboard
+      tags: [inkloom]
+      summary: Get dashboard summary and recent activity
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardResponse"
+  /inkloom/reviews:
+    get:
+      operationId: listInkloomReviews
+      tags: [inkloom]
+      summary: List reviews with their findings and decisions
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: createInkloomReview
+      tags: [inkloom]
+      summary: Analyze marketing content against enabled brand rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Analyzed review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Invalid content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inkloom/reviews/{id}:
+    get:
+      operationId: getInkloomReview
+      tags: [inkloom]
+      summary: Get a review and its evidence-based findings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "404":
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inkloom/reviews/{id}/decision:
+    patch:
+      operationId: decideInkloomReview
+      tags: [inkloom]
+      summary: Record a human reviewer decision and reason
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewDecisionInput"
+      responses:
+        "200":
+          description: Updated review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Invalid decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Review not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inkloom/rules:
+    get:
+      operationId: listInkloomRules
+      tags: [inkloom]
+      summary: List editable brand rules
+      responses:
+        "200":
+          description: Brand rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BrandRule"
+    post:
+      operationId: createInkloomRule
+      tags: [inkloom]
+      summary: Create a brand rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrandRuleInput"
+      responses:
+        "201":
+          description: Created brand rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandRule"
+        "400":
+          description: Invalid rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inkloom/rules/{id}:
+    patch:
+      operationId: updateInkloomRule
+      tags: [inkloom]
+      summary: Update an existing brand rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrandRuleUpdate"
+      responses:
+        "200":
+          description: Updated brand rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandRule"
+        "404":
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteInkloomRule
+      tags: [inkloom]
+      summary: Delete a brand rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Rule deleted
+        "404":
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +230,128 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Finding:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string }
+        severity: { type: string, enum: [high, medium, low, info] }
+        evidence: { type: string }
+        explanation: { type: string }
+        rule: { type: string }
+        suggestion: { type: string }
+        status: { type: string, enum: [open, accepted, dismissed] }
+      required: [id, type, severity, evidence, explanation, rule, suggestion, status]
+    Review:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        channel: { type: string }
+        content: { type: string }
+        status: { type: string, enum: [Pending, Approved, "Needs Changes", Dismissed] }
+        findings:
+          type: array
+          items: { $ref: "#/components/schemas/Finding" }
+        auditLog:
+          type: array
+          items: { $ref: "#/components/schemas/ReviewAuditEvent" }
+        reviewer: { type: ["string", "null"] }
+        decisionReason: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, title, channel, content, status, findings, auditLog, reviewer, decisionReason, createdAt, updatedAt]
+    ReviewAuditEvent:
+      type: object
+      properties:
+        id: { type: string }
+        action: { type: string }
+        actor: { type: string }
+        reason: { type: ["string", "null"] }
+        at: { type: string, format: date-time }
+      required: [id, action, actor, reason, at]
+    ReviewInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120 }
+        channel: { type: string, minLength: 1, maxLength: 80 }
+        content: { type: string, minLength: 1, maxLength: 20000 }
+      required: [title, channel, content]
+    ReviewDecisionInput:
+      type: object
+      properties:
+        status: { type: string, enum: [Approved, "Needs Changes", Dismissed] }
+        reviewer: { type: string, minLength: 1, maxLength: 100 }
+        reason: { type: string, minLength: 1, maxLength: 1000 }
+      required: [status, reviewer, reason]
+    BrandRule:
+      type: object
+      properties:
+        id: { type: string }
+        category:
+          type: string
+          enum: [tone, terminology, prohibited_claim, approved_messaging, disclaimer, accessibility, visual]
+        name: { type: string }
+        description: { type: string }
+        pattern: { type: string }
+        replacement: { type: ["string", "null"] }
+        severity: { type: string, enum: [high, medium, low, info] }
+        enabled: { type: boolean }
+        sample: { type: boolean }
+      required: [id, category, name, description, pattern, replacement, severity, enabled, sample]
+    BrandRuleInput:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [tone, terminology, prohibited_claim, approved_messaging, disclaimer, accessibility, visual]
+        name: { type: string, minLength: 1, maxLength: 120 }
+        description: { type: string, minLength: 1, maxLength: 1000 }
+        pattern: { type: string, minLength: 1, maxLength: 300 }
+        replacement: { type: ["string", "null"] }
+        severity: { type: string, enum: [high, medium, low, info] }
+        enabled: { type: boolean }
+      required: [category, name, description, pattern, severity, enabled]
+    BrandRuleUpdate:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [tone, terminology, prohibited_claim, approved_messaging, disclaimer, accessibility, visual]
+        name: { type: string, minLength: 1, maxLength: 120 }
+        description: { type: string, minLength: 1, maxLength: 1000 }
+        pattern: { type: string, minLength: 1, maxLength: 300 }
+        replacement: { type: ["string", "null"] }
+        severity: { type: string, enum: [high, medium, low, info] }
+        enabled: { type: boolean }
+    DashboardResponse:
+      type: object
+      properties:
+        totalReviews: { type: integer }
+        pendingReviews: { type: integer }
+        needsChanges: { type: integer }
+        approvedReviews: { type: integer }
+        openFindings: { type: integer }
+        highRiskFindings: { type: integer }
+        recentReviews:
+          type: array
+          items: { $ref: "#/components/schemas/Review" }
+        recentActivity:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              reviewTitle: { type: string }
+              action: { type: string }
+              actor: { type: string }
+              at: { type: string, format: date-time }
+            required: [id, reviewTitle, action, actor, at]
+      required: [totalReviews, pendingReviews, needsChanges, approvedReviews, openFindings, highRiskFindings, recentReviews, recentActivity]
 

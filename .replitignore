@@ -3,3 +3,8 @@
 
 # No need to store the pnpm store twice.
 .local
+
+# Local SQLite demo data is seeded on first app start.
+**/data/*.sqlite
+**/data/*.sqlite-shm
+**/data/*.sqlite-wal

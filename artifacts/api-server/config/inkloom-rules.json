@@ -1,0 +1,79 @@
+[
+  {
+    "id": "sample-tone-hype",
+    "category": "tone",
+    "name": "Keep claims calm and specific",
+    "description": "Avoid inflated superlatives and high-pressure hype in customer-facing copy.",
+    "pattern": "world's best|best in the world|crush your goals|insane results",
+    "replacement": "describe a specific, supportable benefit",
+    "severity": "medium",
+    "enabled": true,
+    "sample": true
+  },
+  {
+    "id": "sample-brand-spelling",
+    "category": "terminology",
+    "name": "Use the approved product spelling",
+    "description": "The approved product name is “Inkloom AI” with a space.",
+    "pattern": "InkloomAI",
+    "replacement": "Inkloom AI",
+    "severity": "medium",
+    "enabled": true,
+    "sample": true
+  },
+  {
+    "id": "sample-claims",
+    "category": "prohibited_claim",
+    "name": "Substantiate absolute claims",
+    "description": "Absolute and performance claims need an approved source. This demo does not connect to a source repository.",
+    "pattern": "guaranteed|risk-free|100% accurate|number one",
+    "replacement": "Add an approved source for human verification, or revise to a measurable, supportable statement.",
+    "severity": "high",
+    "enabled": true,
+    "sample": true
+  },
+  {
+    "id": "sample-approved-messaging",
+    "category": "approved_messaging",
+    "name": "Keep reviewers in control",
+    "description": "Describe Inkloom AI as assisting review, not automatically approving content.",
+    "pattern": "automatically approves content|replaces the reviewer",
+    "replacement": "supports reviewers with evidence-based checks",
+    "severity": "high",
+    "enabled": true,
+    "sample": true
+  },
+  {
+    "id": "sample-disclaimer",
+    "category": "disclaimer",
+    "name": "Add a disclaimer to performance claims",
+    "description": "When an absolute or performance claim appears, include the sample disclaimer or another approved disclosure.",
+    "pattern": "results may vary",
+    "replacement": "Add the approved disclaimer “Results may vary.”",
+    "severity": "medium",
+    "enabled": true,
+    "sample": true
+  },
+  {
+    "id": "sample-accessibility-links",
+    "category": "accessibility",
+    "name": "Use descriptive link text",
+    "description": "Avoid generic link labels such as “click here” or “read more”; describe the destination or action.",
+    "pattern": "click here|read more",
+    "replacement": "Use link text that describes the destination or action.",
+    "severity": "low",
+    "enabled": true,
+    "sample": true
+  },
+  {
+    "id": "sample-visual-demo",
+    "category": "visual",
+    "name": "Approved logo comparison (demo only)",
+    "description": "DEMO ONLY: no image upload or pixel-level logo comparison is implemented.",
+    "pattern": "logo image",
+    "replacement": null,
+    "severity": "info",
+    "enabled": false,
+    "sample": true
+  }
+]

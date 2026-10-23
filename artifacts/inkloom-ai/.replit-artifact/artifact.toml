@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Inkloom AI"
+description = "An intelligent brand governance platform for reviewing marketing content against approved brand rules, terminology, messaging, accessibility basics, and evidence-backed claims, with human approvals and an audit history."
+version = "1.0.0"
+id = "artifacts/inkloom-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26206
+
+[services.development]
+run = "pnpm --filter @workspace/inkloom-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/inkloom-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/inkloom-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26206"
+BASE_PATH = "/"
